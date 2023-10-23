@@ -1,0 +1,21 @@
+# Env files
+.env
+.envs/*
+# Except example env files
+!.envs/*/*.example
+
+.venv/
+venv/
+
+.idea/
+.vscode/
+.github/
+**/__pycache__/
+
+
+.python-version
+*.sqlite3
+*.bak
+.coverage
+*.tmp
+*.log

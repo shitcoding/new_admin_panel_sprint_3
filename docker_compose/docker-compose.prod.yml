@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  movies_admin:
+    container_name: movies-admin-app
+    build:
+      context: ../movies_admin/
+      dockerfile: ../docker_compose/Dockerfile
+      args:
+        BUILD_MODE: prod
+    env_file:
+      - ./.envs/.prod/.django
+      - ./.envs/.prod/.db
+    restart: unless-stopped
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: movies-admin-postgres
+    image: postgres:13.0-alpine
+    env_file:
+      - ./.envs/.prod/.db
+    restart: unless-stopped
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+      # Create db schema on container first launch
+      - ./utils/create_postgres_schema:/docker-entrypoint-initdb.d
+
+  nginx:
+    container_name: movies-admin-nginx
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile.nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - movies_admin
+
+volumes:
+  postgres_volume:
+  static_volume:

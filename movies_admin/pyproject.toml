@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "movies-admin"
+version = "0.0.1"
+description = "Django admin panel for managing movies database"
+authors = ["shitcoding <shitcoder@pm.me>"]
+readme = "README.md"
+packages = [{include = "movies_admin"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "4.2.5"
+django-split-settings = "1.2.0"
+psycopg2-binary = "2.9.7"
+django-environ = "0.11.2"
+djangorestframework = "^3.14.0"
+gunicorn = "^21.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "6.1.0"
+django-extensions = "^3.2.3"
+ipython = "^8.15.0"
+django-debug-toolbar = "^4.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

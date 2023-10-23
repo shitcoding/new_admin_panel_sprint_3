@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  movies_admin:
+    container_name: movies-admin-app
+    build:
+      context: ../movies_admin/
+      dockerfile: ../docker_compose/Dockerfile
+      args:
+        BUILD_MODE: dev
+    env_file:
+      - ./.envs/.dev/.django
+      - ./.envs/.dev/.db
+    restart: unless-stopped
+    volumes:
+      - ../movies_admin:/home/app/web:delegated # enable hot code reload in debug mode
+      - static_volume:/home/app/web/staticfiles
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: movies-admin-postgres
+    image: postgres:13.0-alpine
+    env_file:
+      - ./.envs/.dev/.db
+    restart: unless-stopped
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+      # Create db schema on container first launch
+      - ./utils/create_postgres_schema:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+
+  nginx:
+    container_name: movies-admin-nginx
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile.nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - movies_admin
+
+volumes:
+  postgres_volume:
+  static_volume:

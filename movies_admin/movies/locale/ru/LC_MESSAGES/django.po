@@ -1,0 +1,130 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-18 17:43+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: movies/admin.py:10 movies/models.py:37 movies/models.py:65
+msgid "Genre"
+msgstr "Жанр"
+
+#: movies/admin.py:11 movies/admin.py:99 movies/models.py:38
+#: movies/models.py:66
+msgid "Genres"
+msgstr "Жанры"
+
+#: movies/admin.py:18 movies/models.py:79 movies/models.py:113
+msgid "Person"
+msgstr "Персона"
+
+#: movies/admin.py:19 movies/models.py:80 movies/models.py:114
+msgid "Persons"
+msgstr "Персоны"
+
+#: movies/admin.py:45
+msgid "Total"
+msgstr "Всего"
+
+#: movies/apps.py:8
+msgid "Movies"
+msgstr "Фильмы"
+
+#: movies/models.py:9
+msgid "created"
+msgstr "создано"
+
+#: movies/models.py:16
+msgid "modified"
+msgstr "изменено"
+
+#: movies/models.py:30 movies/models.py:121
+msgid "name"
+msgstr "название"
+
+#: movies/models.py:31 movies/models.py:122
+msgid "description"
+msgstr "описание"
+
+#: movies/models.py:45
+msgid "movie"
+msgstr "фильм"
+
+#: movies/models.py:46
+msgid "TV show"
+msgstr "шоу"
+
+#: movies/models.py:73
+msgid "full name"
+msgstr "полное имя"
+
+#: movies/models.py:87
+msgid "Actor"
+msgstr "Актер"
+
+#: movies/models.py:88
+msgid "Director"
+msgstr "Режиссер"
+
+#: movies/models.py:89
+msgid "Writer"
+msgstr "Сценарист"
+
+#: movies/models.py:90
+msgid "Producer"
+msgstr "Продюсер"
+
+#: movies/models.py:91
+msgid "Composer"
+msgstr "Композитор"
+
+#: movies/models.py:92
+msgid "Cinematographer"
+msgstr "Оператор"
+
+#: movies/models.py:93
+msgid "Editor"
+msgstr "Монтажер"
+
+#: movies/models.py:99
+msgid "role"
+msgstr "роли"
+
+#: movies/models.py:123
+msgid "creation date"
+msgstr "дата создания"
+
+#: movies/models.py:125
+msgid "rating"
+msgstr "рейтинг"
+
+#: movies/models.py:130
+msgid "type"
+msgstr "тип"
+
+#: movies/models.py:136
+msgid "file path"
+msgstr ""
+
+#: movies/models.py:156
+msgid "Filmwork"
+msgstr "Кинопроизведение"
+
+#: movies/models.py:157
+msgid "Filmworks"
+msgstr "Кинопроизведения"
