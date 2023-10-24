@@ -1,0 +1,36 @@
+FROM python:3.11-alpine
+
+ENV TZ=Europe/London \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONHASHSEED=random \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100
+
+# Create appropriate directories
+ENV APP_HOME=/home/app/etl
+WORKDIR $APP_HOME
+
+# Install dependencies
+RUN apk update && apk add --no-cache \
+  libpq-dev \
+  gcc \
+  make \
+  build-base
+
+# Copy project files
+COPY . .
+
+# Create non-root app user, chown all files to the app user
+RUN addgroup -S etl && adduser -S etl -G etl && chown -R etl:etl $APP_HOME 
+
+# Install python dependencies
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+
+USER etl
+
+ENTRYPOINT [ "python3", "main.py" ]

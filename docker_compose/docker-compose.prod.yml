@@ -27,6 +27,8 @@ services:
       - postgres_volume:/var/lib/postgresql/data
       # Create db schema on container first launch
       - ./utils/create_postgres_schema:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
 
   nginx:
     container_name: movies-admin-nginx
@@ -41,6 +43,48 @@ services:
     depends_on:
       - movies_admin
 
+  elasticsearch:
+    container_name: movies-admin-elasticsearch
+    image: elasticsearch:8.10.2
+    restart: always
+    volumes:
+      - elasticsearch_volume:/usr/share/elasticsearch/data
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: curl -s http://movies-admin-elasticsearch:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  etl:
+    container_name: movies-admin-etl
+    build:
+      context: ../postgres_to_es/
+      dockerfile: ./Dockerfile.etl
+    env_file:
+      - ../postgres_to_es/.env
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - elasticsearch
+
+
 volumes:
   postgres_volume:
   static_volume:
+  elasticsearch_volume:
