@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "postgres-to-es"
+version = "0.0.1"
+description = "Postgres to Elasticsearch ETL"
+authors = ["shitcoding <shitcoder@pm.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.4.2"
+psycopg = "^3.1.12"
+pydantic-settings = "^2.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
