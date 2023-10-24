@@ -7,18 +7,15 @@ from etl.loader.load import load_to_es
 from etl.transformer.transform import transform
 from etl.utils.logger import logger
 from psycopg import ServerCursor
-from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
-from settings import STATE_KEY, UPDATE_INTERVAL, db_settings
+from settings import STATE_KEY, UPDATE_INTERVAL, etl_settings
 from state.json_file_storage import JsonFileStorage
 from state.models import State
 
 if __name__ == '__main__':
     state = State(JsonFileStorage(logger=logger))
 
-    print(db_settings.model_dump())   #########   DEBUG ################
-    dsn = make_conninfo(**db_settings.model_dump())
-    print(dsn)   #########   DEBUG ################
+    dsn = str(etl_settings.pg_dsn)
 
     with psycopg.connect(dsn, row_factory=dict_row) as conn, ServerCursor(
         conn, 'fetcher'
