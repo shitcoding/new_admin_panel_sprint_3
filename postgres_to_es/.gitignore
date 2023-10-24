@@ -1,4 +1,11 @@
+# ETL state storage file
 storage.json
+
+# Env files
+.env
+.envs/*
+# Except example env files
+!.envs/*/*.example
 
 # Django #
 *.log
