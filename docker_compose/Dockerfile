@@ -52,9 +52,6 @@ COPY . $APP_HOME
 # Create non-root app user, chown all files to the app user
 RUN addgroup -S app && adduser -S app -G app && chown -R app:app $APP_HOME 
 
-# RUN chown -R app:app entrypoint.sh && \
-#   chmod u+x entrypoint.sh
-
 # Change to the app user
 USER app
 
@@ -63,4 +60,3 @@ EXPOSE 8000
 # Run production gunicorn server if MODE=prod,
 # run django dev server for cot code reload if MODE=dev
 CMD [ "./entrypoint.sh" ]
-# CMD [ "make", "run-gunicorn-docker" ]
