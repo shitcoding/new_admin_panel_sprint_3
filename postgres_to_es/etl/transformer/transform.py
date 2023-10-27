@@ -1,22 +1,23 @@
 from typing import Generator
-from pydantic import ValidationError
-from state.models import Movie
 
-from etl.utils.decorators import coroutine
-from etl.utils.logger import logger
+from models.models import Filmwork, Genre, Person
+from utils.logger import logger
 
 
-@coroutine
-def transform(next_node: Generator) -> Generator[None, list[dict], None]:
-    while dicts := (yield):
-        batch = []
-        for _dict in dicts:
-            try:
-                movie = Movie(**_dict)
-                movie.title = movie.title.upper()   ####### TODO: REPLACE MOCK TRANSFORMATION
-                logger.info(movie.model_dump_json())
-                batch.append(movie)
-            except ValidationError as e:
-                print(_dict)
-                print(str(e))
-        next_node.send(batch)
+class FilmworkTransformer:
+    def __init__(self, next_node: Generator):
+        self.next_node = next_node
+
+    def transform(self):
+        next_node = self.next_node()
+        next_node.send(None)
+
+        try:
+            while dicts := (yield):
+                batch = []
+                for _dict in dicts:
+                    logger.info(f'Transforming entry: {_dict}')
+                    batch.append(_dict)
+                next_node.send(batch)
+        except GeneratorExit:
+            logger.info('Finished transforming entries')
