@@ -4,6 +4,11 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class ModifiedRow(BaseModel):
+    id: uuid.UUID
+    modified: datetime
+
+
 class Genre(BaseModel):
     id: uuid.UUID
     name: str
