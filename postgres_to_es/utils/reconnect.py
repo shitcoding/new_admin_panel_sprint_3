@@ -8,7 +8,7 @@ def reconnect_client(func):
     @wraps(func)
     def wrapper(client: BaseClient, *args, **kwargs):
         if not client.is_connected:
-            logger.warning('Client %r is disconnected, trying to reconnect', client)
+            logger.warning('Client {} is disconnected, trying to reconnect', client)
             client.reconnect()
         return func(client, *args, **kwargs)
     return wrapper
