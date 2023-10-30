@@ -1,25 +1,25 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Generator
 
-from psycopg import ServerCursor
-
-from utils.logger import logger
+from clients.postgres import PostgresClient
+from etl.extractor import queries
+from models.models import Filmwork, ModifiedRow
 from state.state import State
+from utils.logger import logger
 
 
 class BaseExtractor(ABC):
     def __init__(
         self,
-        cur: ServerCursor,  # TODO: change cur to pg_conn
+        pg_conn: PostgresClient,
         state: State,
-        chunk_size: int,
-        next_node: Generator,
+        pg_chunk_size: int,
+        transformer: Generator,
     ):
-        self.cur = cur   # TODO: change cur to pg_conn
+        self.pg_conn = pg_conn
         self.state = state
-        self.chunk_size = chunk_size
-        self.next_node = next_node
+        self.pg_chunk_size = pg_chunk_size
+        self.transformer = transformer
         self.table_name: str | None = None
 
     @abstractmethod
@@ -27,84 +27,161 @@ class BaseExtractor(ABC):
         self.fetch_modified()
 
     @abstractmethod
-    def fetch_modified(self) -> Generator[None, datetime, None]:
-        last_modified = self.state.get_state() or str(datetime.min)
+    def fetch_modified(self):
+        fetching_started = False
 
-        next_node = self.next_node()
-        next_node.send(None)
+        with self.pg_conn.cursor() as cur:
+            last_modified = self.state.get_state().last_modified
 
-        logger.info(
-            f'Fetching {self.table_name} entries changed after {last_modified}'
-        )
+            query = """
+                    SELECT *
+                    FROM content.{}
+                    WHERE modified > %s
+                    ORDER BY modified;
+                    """.format(
+                self.table_name
+            )
 
-        query = f"""
-              SELECT *
-              FROM {self.table_name}
-              WHERE modified > %s
-              ORDER BY modified ASC;
-              """
-        self.cur.execute(query, (last_modified,))
-        while results := self.cur.fetchmany(size=self.chunk_size):
-            next_node.send(results)
+            cur.execute(query, (last_modified,))
+
+            while data := cur.fetchmany(self.pg_chunk_size):
+                if not fetching_started:
+                    # Initialize next node generator
+                    next_node = self.enrich()
+                    next_node.send(None)
+                    fetching_started = True
+                modified_rows = [ModifiedRow(**row) for row in data]
+                last_modified = modified_rows[-1].modified
+                next_node.send((last_modified, modified_rows))
+
+    @property
+    @abstractmethod
+    def enrich_query(self):
+        pass
 
     @abstractmethod
     def enrich(self):
-        pass
+        enrich_started = False
+
+        with self.pg_conn.cursor() as cur:
+            try:
+                while True:
+                    last_modified, modified_rows = yield
+
+                    cur.execute(
+                        self.enrich_query,
+                        [tuple([row.id for row in modified_rows])],
+                    )
+
+                    while data := cur.fetchmany(self.pg_chunk_size):
+                        if not enrich_started:
+                            # Initialize next node generator
+                            next_node = self.merge()
+                            next_node.send(None)
+                            enrich_started = True
+                        next_node.send(
+                            (
+                                last_modified,
+                                [ModifiedRow(**row) for row in data],
+                            )
+                        )
+            except GeneratorExit:
+                logger.debug('Finished enriching rows')
 
     @abstractmethod
     def merge(self):
-        pass
+        # Initialize next node generator
+        next_node = self.transformer()
+        next_node.send(None)
+
+        with self.pg_conn.cursor() as cur:
+            try:
+                while True:
+                    last_modified, modified_rows = yield
+                    modified_rows: list[ModifiedRow]
+
+                    cur.execute(
+                        queries.MERGE_QUERY,
+                        [tuple([row.id for row in modified_rows])],
+                    )
+                    while data := cur.fetchmany(self.pg_chunk_size):
+                        next_node.send(
+                            (last_modified, [Filmwork(**row) for row in data])
+                        )
+            except GeneratorExit:
+                logger.debug('Finished merging rows')
 
 
 class FilmworkExtractor(BaseExtractor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.table_name = 'content.film_work'
+        self.table_name = 'film_work'
 
     def extract(self):
         return super().extract()
 
-    def fetch_modified(self) -> Generator[None, datetime, None]:
+    def fetch_modified(self):
         return super().fetch_modified()
 
-    def enrich(self):
+    @property
+    def enrich_query(self):
         pass
 
+    def enrich(self):
+        # Initialize next node generator
+        next_node = self.merge()
+        next_node.send(None)
+
+        try:
+            while True:
+                last_modified, modified_rows = yield
+                next_node.send((last_modified, modified_rows))
+        except GeneratorExit:
+            pass
+
     def merge(self):
-        pass
+        return super().merge()
 
 
 class GenreExtractor(BaseExtractor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.table_name = 'content.genre'
+        self.table_name = 'genre'
 
     def extract(self):
         return super().extract()
 
-    def fetch_modified(self) -> Generator[None, datetime, None]:
+    def fetch_modified(self):
         return super().fetch_modified()
 
+    @property
+    def enrich_query(self):
+        return queries.GENRE_ENRICH_QUERY
+
     def enrich(self):
-        pass
+        return super().enrich()
 
     def merge(self):
-        pass
+        return super().merge()
 
 
 class PersonExtractor(BaseExtractor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.table_name = 'content.person'
+        self.table_name = 'person'
 
     def extract(self):
         return super().extract()
 
-    def fetch_modified(self) -> Generator[None, datetime, None]:
+    def fetch_modified(self):
         return super().fetch_modified()
 
+    @property
+    def enrich_query(self):
+        return queries.PERSON_ENRICH_QUERY
+
     def enrich(self):
-        pass
+        return super().enrich()
 
     def merge(self):
-        pass
+        return super().merge()
