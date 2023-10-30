@@ -8,9 +8,10 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 pydantic = "^2.4.2"
-psycopg = "^3.1.12"
 pydantic-settings = "^2.0.3"
 loguru = "^0.7.2"
+psycopg2-binary = "2.9.9"
+backoff = "2.2.1"
 
 
 [build-system]
