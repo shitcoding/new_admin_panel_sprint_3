@@ -33,16 +33,10 @@ class BaseExtractor(ABC):
         with self.pg_conn.cursor() as cur:
             last_modified = self.state.get_state().last_modified
 
-            query = """
-                    SELECT *
-                    FROM content.{}
-                    WHERE modified > %s
-                    ORDER BY modified;
-                    """.format(
-                self.table_name
+            cur.execute(
+                queries.FETCH_QUERY.format(self.table_name),
+                (last_modified,),
             )
-
-            cur.execute(query, (last_modified,))
 
             while data := cur.fetchmany(self.pg_chunk_size):
                 if not fetching_started:

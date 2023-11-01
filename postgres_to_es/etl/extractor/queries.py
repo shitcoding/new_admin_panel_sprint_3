@@ -1,5 +1,12 @@
+FETCH_QUERY = """SELECT *
+                FROM content.{}
+                WHERE modified > %s
+                ORDER BY modified;
+                """
+
+
 GENRE_ENRICH_QUERY = """SELECT DISTINCT
-                        fw.id, fw.modified
+                fw.id, fw.modified
                     FROM
                         content.film_work fw
                     LEFT JOIN
