@@ -12,6 +12,7 @@ pydantic-settings = "^2.0.3"
 loguru = "^0.7.2"
 psycopg2-binary = "2.9.9"
 backoff = "2.2.1"
+elasticsearch = "^8.10.1"
 
 
 [build-system]
