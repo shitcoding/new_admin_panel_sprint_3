@@ -9,6 +9,8 @@ from utils.logger import logger
 
 
 class BaseExtractor(ABC):
+    TABLE_NAME: str | None = None
+
     def __init__(
         self,
         pg_conn: PostgresClient,
@@ -20,7 +22,6 @@ class BaseExtractor(ABC):
         self.state = state
         self.pg_chunk_size = pg_chunk_size
         self.transformer = transformer
-        self.table_name: str | None = None
 
     @abstractmethod
     def extract(self):
@@ -34,7 +35,7 @@ class BaseExtractor(ABC):
             last_modified = self.state.get_state().last_modified
 
             cur.execute(
-                queries.FETCH_QUERY.format(self.table_name),
+                queries.FETCH_QUERY.format(self.TABLE_NAME),
                 (last_modified,),
             )
 
@@ -107,9 +108,10 @@ class BaseExtractor(ABC):
 
 
 class FilmworkExtractor(BaseExtractor):
+    TABLE_NAME = 'film_work'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.table_name = 'film_work'
 
     def extract(self):
         return super().extract()
@@ -138,9 +140,7 @@ class FilmworkExtractor(BaseExtractor):
 
 
 class GenreExtractor(BaseExtractor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.table_name = 'genre'
+    TABLE_NAME = 'genre'
 
     def extract(self):
         return super().extract()
@@ -160,9 +160,7 @@ class GenreExtractor(BaseExtractor):
 
 
 class PersonExtractor(BaseExtractor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.table_name = 'person'
+    TABLE_NAME = 'person'
 
     def extract(self):
         return super().extract()
